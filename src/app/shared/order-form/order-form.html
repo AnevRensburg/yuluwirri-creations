@@ -1,0 +1,177 @@
+<form class="order-form" [formGroup]="form" (ngSubmit)="submit()" novalidate>
+  @if (sentUrl(); as url) {
+    <div class="done" role="status">
+      <p class="done__title">Almost done!</p>
+      @if (viaWhatsapp) {
+        <p>
+          WhatsApp has opened with your order typed out. Just press <strong>Send</strong> and we’ll
+          get back to you to confirm.
+        </p>
+        <p class="small">
+          Didn’t open? <a [href]="url" target="_blank" rel="noopener">Open WhatsApp</a> or
+          <a [href]="emailUrl()">email it to us instead</a>.
+        </p>
+      } @else {
+        <p>
+          Your email app has opened with your order typed out. Just press <strong>Send</strong> and
+          we’ll get back to you to confirm.
+        </p>
+        <p class="small">Didn’t open? <a [href]="url">Try again</a>.</p>
+      }
+      <button type="button" class="link" (click)="startOver()">Start a new order</button>
+    </div>
+  } @else {
+    <h3 class="title">Your order</h3>
+
+    @if (cart.lines().length) {
+      <ul class="summary">
+        @for (l of cart.lines(); track l.key) {
+          <li>
+            <span class="summary__name"
+              >{{ l.product.name }}
+              @if (l.option.label) {
+                <small>{{ l.option.label }}</small>
+              }
+            </span>
+            <span class="summary__qty">
+              <button
+                type="button"
+                (click)="cart.change(l.product.id, l.product.options.indexOf(l.option), -1)"
+                [attr.aria-label]="'One less ' + l.product.name"
+              >
+                <app-icon name="minus" />
+              </button>
+              {{ l.quantity }}
+              <button
+                type="button"
+                (click)="cart.change(l.product.id, l.product.options.indexOf(l.option), 1)"
+                [attr.aria-label]="'One more ' + l.product.name"
+              >
+                <app-icon name="plus" />
+              </button>
+            </span>
+            <span class="summary__price">
+              {{
+                l.option.price === null
+                  ? 'On request'
+                  : (l.product.fromPrice ? 'From ' : '') + formatRand(l.option.price * l.quantity)
+              }}
+            </span>
+          </li>
+        }
+        @if (cart.total().saving) {
+          <li class="summary__saving">
+            <span>Multi-buy special</span>
+            <span>−{{ formatRand(cart.total().saving) }}</span>
+          </li>
+        }
+        <li class="summary__total">
+          <span>Total</span>
+          <strong>
+            @if (cart.total().amount === 0 && cart.total().partial) {
+              On request
+            } @else {
+              {{ cart.total().from ? 'From ' : '' }}{{ formatRand(cart.total().amount)
+              }}{{ cart.total().partial ? ' + on request' : '' }}
+            }
+          </strong>
+        </li>
+      </ul>
+    } @else {
+      <p class="empty" [class.empty--error]="emptyError()">
+        Add products above with <strong>Add to order</strong>, or just tell us what you’d like in
+        the message below.
+      </p>
+    }
+
+    <div class="row">
+      <div class="field">
+        <label for="o-name">Name*</label>
+        <input
+          id="o-name"
+          formControlName="name"
+          autocomplete="name"
+          [attr.aria-invalid]="showError('name')"
+          aria-describedby="o-name-error"
+        />
+        @if (showError('name')) {
+          <p id="o-name-error" class="error">Please enter your name.</p>
+        }
+      </div>
+      <div class="field">
+        <label for="o-phone">Contact number*</label>
+        <input
+          id="o-phone"
+          type="tel"
+          formControlName="phone"
+          autocomplete="tel"
+          inputmode="tel"
+          [attr.aria-invalid]="showError('phone')"
+          aria-describedby="o-phone-error"
+        />
+        @if (showError('phone')) {
+          <p id="o-phone-error" class="error">Please enter a valid phone number.</p>
+        }
+      </div>
+    </div>
+
+    <div class="field">
+      <label for="o-email">Email</label>
+      <input
+        id="o-email"
+        type="email"
+        formControlName="email"
+        autocomplete="email"
+        [attr.aria-invalid]="showError('email')"
+      />
+    </div>
+
+    @if (deliveryOptions.length) {
+      <fieldset class="field">
+        <legend>Delivery or collection*</legend>
+        <div class="choices">
+          @for (d of deliveryOptions; track d.id) {
+            <label class="choice">
+              <input type="radio" formControlName="delivery" [value]="d.id" />
+              <span>
+                {{ d.label }}
+                <small>{{ d.note }}</small>
+              </span>
+            </label>
+          }
+        </div>
+      </fieldset>
+    }
+
+    @if (needsAddress()) {
+      <div class="field">
+        <label for="o-address">Delivery address*</label>
+        <textarea
+          id="o-address"
+          formControlName="address"
+          rows="3"
+          autocomplete="street-address"
+          [attr.aria-invalid]="showError('address')"
+          aria-describedby="o-address-error"
+        ></textarea>
+        @if (showError('address')) {
+          <p id="o-address-error" class="error">We need your address for delivery.</p>
+        }
+      </div>
+    }
+
+    <div class="field">
+      <label for="o-notes">Message</label>
+      <textarea id="o-notes" formControlName="notes" rows="3"></textarea>
+    </div>
+
+    <button type="submit" class="button button--accent submit">
+      <app-icon [name]="viaWhatsapp ? 'whatsapp' : 'mail'" />
+      Send order via {{ viaWhatsapp ? 'WhatsApp' : 'email' }}
+    </button>
+    <p class="small">
+      This opens {{ viaWhatsapp ? 'WhatsApp' : 'your email app' }} with everything filled in.
+      Nothing is sent until you press Send. We’ll confirm your order and send payment details.
+    </p>
+  }
+</form>

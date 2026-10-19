@@ -1,0 +1,308 @@
+<a class="skip-link" routerLink="/" fragment="order" queryParamsHandling="preserve"
+  >Skip to the order form</a
+>
+
+<header class="topbar">
+  <div class="topbar__inner container">
+    <a class="brand" href="./" [attr.aria-label]="site.name + ', home'">
+      @if (site.logo && wordmark) {
+        <app-picture class="brand__wordmark" [src]="site.logo" alt="" sizes="200px" [priority]="true" />
+      } @else {
+        <span class="brand__mark" [class.brand__mark--initials]="!site.logo" aria-hidden="true">
+          @if (site.logo) {
+            <app-picture [src]="site.logo" alt="" sizes="96px" [priority]="true" />
+          } @else {
+            {{ initials }}
+          }
+        </span>
+        <span class="brand__text">
+          <span class="brand__name">{{ site.name }}</span>
+          <span class="brand__tagline">{{ site.tagline }}</span>
+        </span>
+      }
+    </a>
+
+    <nav id="nav" class="nav" [class.is-open]="menuOpen()" aria-label="Main">
+      <ul>
+        @for (link of nav; track link[0]) {
+          <li>
+            <a
+              routerLink="/"
+              [fragment]="link[0]"
+              queryParamsHandling="preserve"
+              (click)="menuOpen.set(false)"
+              >{{ link[1] }}</a
+            >
+          </li>
+        }
+      </ul>
+    </nav>
+
+    <div class="topbar__actions">
+      <a class="order-pill" routerLink="/" fragment="order" queryParamsHandling="preserve">
+        <app-icon name="bag" />
+        <span class="order-pill__label">Your order</span>
+        @if (cart.count()) {
+          <span class="order-pill__count" aria-live="polite">{{ cart.count() }}</span>
+          <span class="visually-hidden">items</span>
+        }
+      </a>
+      <button
+        type="button"
+        class="menu-button"
+        [attr.aria-expanded]="menuOpen()"
+        aria-controls="nav"
+        (click)="menuOpen.set(!menuOpen())"
+      >
+        <span class="visually-hidden">Menu</span>
+        <span class="menu-button__bars" [class.is-open]="menuOpen()" aria-hidden="true"></span>
+      </button>
+    </div>
+  </div>
+</header>
+
+<main>
+  <section class="hero" [class.hero--split]="split" aria-labelledby="hero-title">
+    @if (!split) {
+      <app-picture
+        class="hero__bg"
+        [src]="site.hero.image"
+        [alt]="site.hero.imageAlt"
+        sizes="100vw"
+        [priority]="true"
+      />
+    }
+    <div class="hero__inner container">
+      <div>
+        <p class="eyebrow eyebrow--light">{{ site.hero.eyebrow }}</p>
+        <h1 id="hero-title">{{ site.hero.title }}</h1>
+        <p class="hero__lead">{{ site.hero.lead }}</p>
+        <div class="hero__actions">
+          <a class="button button--accent" routerLink="/" fragment="products" queryParamsHandling="preserve">
+            {{ site.hero.cta }}
+          </a>
+          <a class="button button--ghost" routerLink="/" fragment="story" queryParamsHandling="preserve">
+            Our story
+          </a>
+        </div>
+      </div>
+      @if (split) {
+        <div class="hero__photo">
+          <app-picture
+            [src]="site.hero.image"
+            [alt]="site.hero.imageAlt"
+            sizes="(min-width: 860px) 480px, 92vw"
+            [priority]="true"
+          />
+        </div>
+      }
+    </div>
+  </section>
+
+  <ul class="highlights container" aria-label="Why customers choose us">
+    @for (h of site.highlights; track h.title) {
+      <li>
+        <span class="highlights__icon"><app-icon [name]="h.icon" /></span>
+        <div>
+          <h2>{{ h.title }}</h2>
+          <p>{{ h.text }}</p>
+        </div>
+      </li>
+    }
+  </ul>
+
+  <section id="products" class="section" aria-labelledby="products-title">
+    <div class="container">
+      <div class="section-head">
+        <p class="eyebrow">{{ site.products.eyebrow }}</p>
+        <h2 id="products-title" class="section-title">{{ site.products.title }}</h2>
+        <p class="section-lead">{{ site.products.lead }}</p>
+      </div>
+      @if (bigCatalogue) {
+        <div class="catalogue-tools">
+          <label class="search">
+            <app-icon name="search" />
+            <span class="visually-hidden">Search products</span>
+            <input
+              type="search"
+              placeholder="Search {{ site.products.items.length }} products"
+              [value]="query()"
+              (input)="query.set($any($event.target).value)"
+            />
+          </label>
+          @if (categories.length > 1) {
+            <div class="filters" role="group" aria-label="Filter by category">
+              <button type="button" [attr.aria-pressed]="!category()" (click)="category.set(null)">
+                All
+              </button>
+              @for (c of categories; track c) {
+                <button
+                  type="button"
+                  [attr.aria-pressed]="category() === c"
+                  (click)="category.set(category() === c ? null : c)"
+                >
+                  {{ c }}
+                </button>
+              }
+            </div>
+          }
+        </div>
+        <p class="result-count" aria-live="polite">
+          Showing {{ visibleProducts().length }} of {{ site.products.items.length }}
+        </p>
+      }
+      <div class="products" [class.products--compact]="bigCatalogue">
+        @for (p of visibleProducts(); track p.id) {
+          <app-product-card [product]="p" />
+        } @empty {
+          <p class="no-results">No products match “{{ query() }}”. Try another word, or ask us in the order form.</p>
+        }
+      </div>
+    </div>
+  </section>
+
+  <section id="story" class="section story" aria-labelledby="story-title">
+    <div class="story__inner container">
+      <div class="story__media">
+        <app-picture
+          [src]="site.story.image"
+          [alt]="site.story.imageAlt"
+          sizes="(min-width: 900px) 560px, 92vw"
+        />
+      </div>
+      <div class="story__copy">
+        <p class="eyebrow">{{ site.story.eyebrow }}</p>
+        <h2 id="story-title" class="section-title">{{ site.story.title }}</h2>
+        @for (para of site.story.paragraphs; track $index) {
+          <p>{{ para }}</p>
+        }
+      </div>
+    </div>
+  </section>
+
+  @if (site.gallery.length) {
+    <section class="gallery" aria-label="Photos">
+      @for (g of site.gallery; track g.image) {
+        <figure>
+          <app-picture [src]="g.image" [alt]="g.alt" sizes="(min-width: 900px) 25vw, 50vw" />
+        </figure>
+      }
+    </section>
+  }
+
+  <section class="section order" aria-labelledby="order-title">
+    <div class="order__inner container">
+      <div class="order__info">
+        <p class="eyebrow">Order</p>
+        <h2 id="order-title" class="section-title">{{ site.order.title }}</h2>
+        <p class="section-lead">{{ site.order.lead }}</p>
+        <ol class="steps">
+          @for (step of site.order.steps; track $index) {
+            <li>
+              <span class="steps__num">{{ $index + 1 }}</span>
+              <span>{{ step }}</span>
+            </li>
+          }
+        </ol>
+        @if (site.order.notes.length) {
+          <ul class="notes">
+            @for (n of site.order.notes; track $index) {
+              <li><app-icon name="check" />{{ n }}</li>
+            }
+          </ul>
+        }
+      </div>
+      <div id="order" class="order__form" tabindex="-1">
+        <app-order-form />
+      </div>
+    </div>
+  </section>
+
+  @if (site.faq.length) {
+    <section class="section faq" aria-labelledby="faq-title">
+      <div class="container container--narrow">
+        <div class="section-head">
+          <p class="eyebrow">Good to know</p>
+          <h2 id="faq-title" class="section-title">Questions</h2>
+        </div>
+        @for (f of site.faq; track f.q) {
+          <details>
+            <summary>{{ f.q }}</summary>
+            <p>{{ f.a }}</p>
+          </details>
+        }
+      </div>
+    </section>
+  }
+
+  <section id="contact" class="contact" aria-labelledby="contact-title">
+    <div class="contact__inner container">
+      <div>
+        <p class="eyebrow eyebrow--light">Contact</p>
+        <h2 id="contact-title" class="section-title">Get in touch</h2>
+        <ul class="contact__list">
+          @if (site.contact.whatsapp) {
+            <li>
+              <app-icon name="whatsapp" />
+              <a [href]="'https://wa.me/' + site.contact.whatsapp" target="_blank" rel="noopener">
+                {{ site.contact.phoneDisplay }} <span class="muted">(WhatsApp)</span>
+              </a>
+            </li>
+          } @else if (site.contact.phoneDisplay) {
+            <li>
+              <app-icon name="phone" />
+              <a [href]="'tel:' + site.contact.phoneDisplay.replaceAll(' ', '')">{{
+                site.contact.phoneDisplay
+              }}</a>
+            </li>
+          }
+          <li>
+            <app-icon name="mail" />
+            <a [href]="'mailto:' + site.contact.email">{{ site.contact.email }}</a>
+          </li>
+          @if (site.contact.address.length) {
+            <li>
+              <app-icon name="pin" />
+              <address>
+                @for (line of site.contact.address; track line) {
+                  {{ line }}<br />
+                }
+              </address>
+            </li>
+          }
+        </ul>
+        @if (site.contact.socials.length) {
+          <div class="socials">
+            @for (s of site.contact.socials; track s.url) {
+              <a [href]="s.url" target="_blank" rel="noopener" [attr.aria-label]="s.label">
+                <app-icon [name]="socialIcon[s.label]" />
+              </a>
+            }
+          </div>
+        }
+      </div>
+      @if (site.contact.hours.length) {
+        <div class="hours">
+          <h3><app-icon name="clock" /> Hours</h3>
+          <ul>
+            @for (h of site.contact.hours; track h) {
+              <li>{{ h }}</li>
+            }
+          </ul>
+        </div>
+      }
+    </div>
+  </section>
+</main>
+
+<footer class="footer">
+  <div class="footer__inner container">
+    <p>© {{ year }} {{ site.name }}</p>
+    <p>
+      Website by
+      <a href="https://anevrensburg.github.io/portfolio/" target="_blank" rel="noopener"
+        >Ané Janse van Rensburg</a
+      >
+    </p>
+  </div>
+</footer>

@@ -1,0 +1,141 @@
+:host {
+  display: block;
+}
+
+.card {
+  display: flex;
+  flex-direction: column;
+  block-size: 100%;
+  overflow: hidden;
+  border: 1px solid var(--line);
+  border-radius: var(--radius);
+  background: var(--surface);
+  transition:
+    transform 0.25s,
+    box-shadow 0.25s;
+
+  &:hover {
+    transform: translateY(-3px);
+    box-shadow: 0 18px 40px rgb(0 0 0 / 0.08);
+  }
+}
+
+.card__media {
+  position: relative;
+  aspect-ratio: 4 / 3;
+  overflow: hidden;
+  background: var(--product-bg, var(--bg));
+
+  app-picture {
+    block-size: 100%;
+    /* Size from the 4:3 box, not from the photo, so tall photos can't stretch the card. */
+    contain: size;
+    --picture-position: var(--product-position, center);
+    --picture-fit: var(--product-fit, cover);
+  }
+}
+
+.card__badge {
+  position: absolute;
+  inset-block-start: 0.85rem;
+  inset-inline-start: 0.85rem;
+  padding: 0.25rem 0.7rem;
+  border-radius: 999px;
+  background: var(--accent);
+  color: var(--accent-ink);
+  font-size: 0.75rem;
+  font-weight: 600;
+  letter-spacing: 0.04em;
+}
+
+.card__body {
+  display: flex;
+  flex: 1;
+  flex-direction: column;
+  gap: 0.75rem;
+  padding: 1.25rem 1.25rem 1.4rem;
+}
+
+.card__name {
+  margin: 0;
+  font-size: 1.3rem;
+}
+
+.card__text {
+  flex: 1;
+  margin: 0;
+  color: var(--muted);
+  font-size: 0.97rem;
+}
+
+.card__options {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.4rem;
+}
+
+.chip {
+  padding: 0.3rem 0.8rem;
+  border: 1px solid var(--line);
+  border-radius: 999px;
+  background: none;
+  color: var(--ink);
+  font: inherit;
+  font-size: 0.85rem;
+  cursor: pointer;
+
+  &[aria-pressed='true'] {
+    border-color: var(--ink);
+    background: var(--ink);
+    color: var(--surface);
+  }
+}
+
+.card__footer {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.75rem;
+  padding-block-start: 0.75rem;
+  border-block-start: 1px solid var(--line);
+}
+
+.card__price {
+  margin: 0;
+  font-family: var(--font-display);
+  font-size: 1.3rem;
+  font-weight: 600;
+
+  span {
+    margin-inline-start: 0.3rem;
+    color: var(--muted);
+    font-family: var(--font-body);
+    font-size: 0.85rem;
+    font-weight: 400;
+  }
+}
+
+.stepper {
+  display: inline-flex;
+  align-items: center;
+  border: 1px solid var(--ink);
+  border-radius: 999px;
+
+  button {
+    display: grid;
+    place-items: center;
+    inline-size: 2.5rem;
+    block-size: 2.5rem;
+    border: 0;
+    background: none;
+    color: var(--ink);
+    cursor: pointer;
+  }
+
+  output {
+    min-inline-size: 1.5rem;
+    text-align: center;
+    font-weight: 600;
+  }
+}
